@@ -56,6 +56,19 @@ public class Position {
 		this.z = z;
 	}
 	
+	/**
+	 * checks if current position equals to another position by its coordinates
+	 */
+	@Override
+	public boolean equals(Object p)
+	{
+		if(!(p instanceof Position))
+		{
+			return false;
+		}
+		return ((this.x==((Position)p).x)&&(this.y==((Position)p).y)&&(this.z==((Position)p).z));
+	}
+	
 	@Override
 	public String toString() {
 		String str = "{" + getX() + "," + getY() + "," + getZ() + "}";

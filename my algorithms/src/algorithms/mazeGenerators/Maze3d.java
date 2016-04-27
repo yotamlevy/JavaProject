@@ -1,6 +1,12 @@
 package algorithms.mazeGenerators;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Maze3d {
 	
@@ -240,6 +246,94 @@ public class Maze3d {
 		return arr;
 	}
 	
+
+	/**
+	 * constructor that gets byte array and construct a maze3d from its bytes
+	 * @param byteArr byte array
+	 * @throws IOException 
+	 */
+	public Maze3d(byte[] byteArr) throws IOException
+	{
+		ByteArrayInputStream in=new ByteArrayInputStream(byteArr);
+		DataInputStream dis=new DataInputStream(in);
+		//creating a stream that reads primitive types easier
+		
+		this.height=dis.readInt();
+		this.width=dis.readInt();
+		this.depth=dis.readInt();
+		
+		maze=new int[height][width][depth];
+		
+		for(int i=0;i<height;i++)
+		{
+			for(int j=0;j<width;j++)
+			{
+				for(int n=0;n<depth;n++)
+				{
+					maze[i][j][n]=dis.read();//reads byte
+					
+				}
+			}
+		}
+		startPosition=new Position(dis.readInt(), dis.readInt(), dis.readInt());
+		
+		goalPosition=new Position(dis.readInt(), dis.readInt(), dis.readInt());
+	}
+	
+	/**
+	 * returning all the maze3d data converted to byte array
+	 * format:
+	 * 4 bytes of size of x axis,4 bytes of size of y axis,4 bytes of size of z axis,
+	 * all the cells of maze 3d matrix,each one as byte,
+	 * the start position:3 integers represented by 4 bytes each
+	 * the goal position :3 integers represented by 4 bytes each
+	 * 
+	 * @return byte array with the maze details
+	 * @throws IOException 
+	 */
+	public byte[] toByteArray() 
+	{
+		//creating a stream that reads primitive types easier
+		ByteArrayOutputStream bb=new ByteArrayOutputStream();
+		DataOutputStream dis=new DataOutputStream(bb);
+		try {
+			dis.writeInt(height);
+			dis.writeInt(width);
+			dis.writeInt(depth);
+			for(int i=0;i<height;i++)
+			{
+				for(int j=0;j<width;j++)
+				{
+					for(int n=0;n<depth;n++)
+					{
+						dis.write(maze[i][j][n]);
+					}
+				}
+			}
+			dis.writeInt(startPosition.getX());
+			dis.writeInt(startPosition.getY());
+			dis.writeInt(startPosition.getZ());
+
+			dis.writeInt(goalPosition.getX());
+			dis.writeInt(goalPosition.getY());
+			dis.writeInt(goalPosition.getZ());
+			
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}	
+		return bb.toByteArray();
+	}
+	
+	
+	/**
+	 * returning hashCode based on the content of the byte array representing the maze
+	 */
+	@Override
+	public int hashCode()  
+	{
+		return Arrays.hashCode(this.toByteArray());
+	}
 	
 	@Override
 	public String toString() {
@@ -256,6 +350,64 @@ public class Maze3d {
 			str.append("\n");
 		}
 		return str.toString();
+	}
+	
+	/**
+	 * checks that two mazes are equal
+	 * return true if equals otherwise return false
+	 */
+	public boolean equals(Object obj)
+	{
+
+		if(obj==null)
+		{
+			return false;
+		}
+		if(this==obj)
+		{
+			return true;
+		}
+		if(!(obj instanceof Maze3d))
+		{
+			return false;
+		}
+		Maze3d other=(Maze3d)obj;//now we know that this object is a Maze3d kind of obj so we can cast it
+		
+		if(this.height!=other.height)
+		{
+			return false;
+		}
+		if(this.width!=other.width)
+		{
+			return false;
+		}
+		if(this.depth!=other.depth)
+		{
+			return false;
+		}
+		
+		for(int i=0;i<height;i++)
+		{
+			for(int j=0;j<width;j++)
+			{
+				for(int n=0;n<depth;n++)
+				{
+					if(this.maze[i][j][n]!=other.maze[i][j][n])
+					{
+						return false;
+					}
+				}
+			}
+		}
+		if(!(this.startPosition.equals(other.startPosition)))
+		{
+			return false;
+		}
+		if(!(this.goalPosition.equals(other.goalPosition)))
+		{
+			return false;
+		}
+		return true;
 	}
 
 }
