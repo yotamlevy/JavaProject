@@ -5,6 +5,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import model.Model;
+import model.MyModel;
+import view.MyView;
 import view.View;
 
 public class Presenter implements Observer {
@@ -13,23 +15,29 @@ public class Presenter implements Observer {
 	private View view;
 	private HashMap<String, Command> viewCommands;
 	private HashMap<String, Command> modelCommands;
+	private Properties prop;
+	
+	public Presenter(Model model, View view, Properties prop) {
+		this.model = model;
+		this.view = view;
+		this.prop = prop;
+		buildCommands();
+	}
 	
 	public Presenter(Model model, View view) {
 		this.model = model;
 		this.view = view;
-		
-		buildCommands();
 	}
-	
+
 	private void buildCommands() {
 		viewCommands = new HashMap<String, Command>();
-		viewCommands.put("generate_maze_3d", new GenerateMazeCommand(model, view));
+		viewCommands.put("generate_maze_3d", new GenerateMazeCommand(model, view, prop));
 		viewCommands.put("display" , new DisplayMazeCommand(model, view));
 		viewCommands.put("file_size" , new FileSizeCommand(view));
 		viewCommands.put("dir", new DirCommand(view));
 		viewCommands.put("save_maze", new SaveMazeCommand(model, view));
 		viewCommands.put("load_maze", new LoadMazeCommand(model, view));
-		viewCommands.put("solve", new SolveMaze(model, view));
+		viewCommands.put("solve", new SolveMaze(model, view, prop));
 		viewCommands.put("cross_section_x", new DisplayCrossSectionByXCommand(view, model));
 		viewCommands.put("cross_section_y", new DisplayCrossSectionByYCommand(view, model));
 		viewCommands.put("help", new HelpCommand(view));

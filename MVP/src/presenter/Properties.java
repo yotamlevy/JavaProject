@@ -14,6 +14,8 @@ public class Properties implements Serializable{
 	private String solveMazeAlgorithm;
 	private String algorithmToGenerateMaze;
 	private String typeOfUserInterfece;
+
+
 	/**
 	 * constructor using fields
 	 * @param numberOfThreads number of threads allowed to run in the model
@@ -28,7 +30,6 @@ public class Properties implements Serializable{
 		this.numberOfThreads = numberOfThreads;
 		this.solveMazeAlgorithm = algorithmToSearch;
 		this.algorithmToGenerateMaze = algorithmToGenerateMaze;
-
 		this.typeOfUserInterfece=typeOfUserInterfece;
 	}
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_51" class="java.beans.XMLDecoder">
+ <object class="presenter.Properties">
+  <void property="algorithmToGenerateMaze">
+   <string>Prim</string>
+  </void>
+  <void property="solveMazeAlgorithm">
+   <string>BFS</string>
+  </void>
+  <void property="typeOfUserInterfece">
+   <string>GUI</string>
+  </void>
+ </object>
+</java>

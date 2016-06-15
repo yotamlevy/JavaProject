@@ -6,10 +6,11 @@ import view.View;
 public class GenerateMazeCommand implements Command {
 	private Model model;
 	private View view; 
-	
-	public GenerateMazeCommand(Model model, View view) {
+	private Properties prop;
+	public GenerateMazeCommand(Model model, View view, Properties prop) {
 		this.model = model;
 		this.view = view;
+		this.prop = prop;
 	}	
 	
 	@Override
@@ -24,7 +25,7 @@ public class GenerateMazeCommand implements Command {
 		int width = Integer.parseInt(args[2]);
 		int depth = Integer.parseInt(args[3]);
 		
-		model.generateMaze(name, height, width, depth);
+		model.generateMaze(name, height, width, depth , prop.getAlgorithmToGenerateMaze());
 	}
 
 }

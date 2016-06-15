@@ -1,5 +1,6 @@
 package model;
 
+import java.beans.XMLDecoder;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,9 +19,12 @@ import java.util.zip.GZIPOutputStream;
 
 import algorithms.demo.Maze3dAdapter;
 import algorithms.domains.State;
+import algorithms.mazeGenerators.CommonMaze3dGenerator;
 import algorithms.mazeGenerators.Maze3d;
+import algorithms.mazeGenerators.Maze3dGenerator;
 import algorithms.mazeGenerators.MyMaze3dGenerator;
 import algorithms.mazeGenerators.Position;
+import algorithms.mazeGenerators.SimpleMaze3dGenerator;
 import algorithms.search.BFS;
 import algorithms.search.DFS;
 import algorithms.search.Solution;
@@ -28,6 +32,7 @@ import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
 import maze3d.domains.Maze3dState;
 import presenter.Presenter;
+import presenter.Properties;
 
 public class MyModel extends Observable implements Model {
 	private Presenter presenter;
@@ -38,6 +43,8 @@ public class MyModel extends Observable implements Model {
 	private ExecutorService service;
 	private int[][] maze2d;
 	private Solution solution;
+	private Properties prop;
+	private HashMap<String, CommonMaze3dGenerator> mgHash = new HashMap<String, CommonMaze3dGenerator>();
 	
 	public String getMessage() {
 		return message;
@@ -46,17 +53,25 @@ public class MyModel extends Observable implements Model {
 	public MyModel() {
 		//service = Executors.newFixedThreadPool();
 		service = Executors.newCachedThreadPool();
+		SimpleMaze3dGenerator simpleMaze = new SimpleMaze3dGenerator();
+		MyMaze3dGenerator primMaze = new MyMaze3dGenerator();
+		mgHash.put("Prim", primMaze);
+		mgHash.put("Simple", simpleMaze);
 	}
 
 	@Override
-	public void generateMaze(String name, int height, int width, int depth) {
+	public void generateMaze(String name, int height, int width, int depth, String algorithm) {
 		
 		service.submit(new Callable<Maze3d>() {
 
 			@Override
 			public Maze3d call() throws Exception {
-				MyMaze3dGenerator mg = new MyMaze3dGenerator();
+				
+				
+
+				CommonMaze3dGenerator mg = mgHash.get(algorithm);
 				Maze3d maze = mg.generate(height, width, depth);
+				
 				mazes.put(name, maze);
 
 				message = "* Maze " + name + " is ready *\n";
@@ -133,7 +148,7 @@ public class MyModel extends Observable implements Model {
 				public Maze3d call() throws Exception {
 					Maze3dAdapter mAdapter = new Maze3dAdapter(getMaze(mazeName));
 				switch (algorithm) {
-				case "bfs":
+				case "BFS":
 					BFS bfs = new BFS();
 					solution = bfs.search(mAdapter);
 					solutions.put(mazeName, solution);
@@ -141,7 +156,7 @@ public class MyModel extends Observable implements Model {
 					setChanged();
 					notifyObservers("display_solution");
 					break;
-				case "dfs":
+				case "DFS":
 					DFS dfs = new DFS();
 					solution = dfs.search(mAdapter);
 					setChanged();
@@ -433,6 +448,23 @@ public class MyModel extends Observable implements Model {
 			return;
 		}	
 		
+	}
+	
+	public void xmlReader(String fileName) 
+	{
+		XMLDecoder decoder;
+		try
+		{
+			decoder = new XMLDecoder(new FileInputStream(fileName));
+		} 
+		catch (FileNotFoundException e)
+		{
+			setChanged();
+			notifyObservers(e.getMessage());
+			return;
+		}
+		prop = (Properties) decoder.readObject();
+		decoder.close();
 	}
 
 }

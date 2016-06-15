@@ -13,6 +13,7 @@ import view.MyView;
 public class Run {
 
 	public static void main(String[] args) {
+	
 		ExecutorService service = Executors.newCachedThreadPool();
 		MyModel model = new MyModel();
 		

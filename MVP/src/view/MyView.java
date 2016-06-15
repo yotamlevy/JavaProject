@@ -32,6 +32,10 @@ public class MyView extends Observable implements View, Observer {
 		cli.addObserver(this);
 	}
 			
+	public MyView() {
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public void displayMessage(String message) {
 		try {
