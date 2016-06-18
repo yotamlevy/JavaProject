@@ -5,9 +5,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Observable;
 
-
+import GUIview.GUI;
 import GUIview.MazeDisplayer;
-import GUIview.MazeWindow;
 import model.MyModel;
 import presenter.Presenter;
 import presenter.Properties;
@@ -48,12 +47,14 @@ public class RunWithGUI {
 		
 		if (ui.equals("GUI"))
 		{
-			MazeWindow mazeWindow = new MazeWindow("The Maze", 800, 600);
-//			GUI view = new GUI();
-//			Presenter presenter = new Presenter(model, view, prop);
-//			mazeWindow.addObserver(presenter);
-//			model.addObserver(presenter);
-			mazeWindow.run();	
+			view = new GUI("The Maze", 800, 600);
+			Presenter presenter = new Presenter(model, view, prop);
+			((Observable) view).addObserver(presenter);
+			model.addObserver(presenter);
+			
+			view.start();
+			//view.run();
+	
 		}
 		else if (ui.equals("CLI"))
 		{

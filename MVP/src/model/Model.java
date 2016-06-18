@@ -18,5 +18,6 @@ public interface Model {
 	Solution getSolution();
 	int[][] getMaze2d();
 	String getMessage();
+	void exit();
 
 }

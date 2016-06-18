@@ -14,6 +14,7 @@ import java.util.Observable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -465,6 +466,33 @@ public class MyModel extends Observable implements Model {
 		}
 		prop = (Properties) decoder.readObject();
 		decoder.close();
+	}
+	
+	@Override
+	public void exit() {
+		if (!service.isTerminated())
+		{
+			try {
+				service.shutdown();
+				if (!service.awaitTermination(5, TimeUnit.SECONDS)){
+					service.shutdownNow();
+					message = "'s threads forced to be terminated.\n";
+					setChanged();
+					notifyObservers("display_message");
+				}
+				else
+				{
+					message = "'s threads terminated successfully.\n";
+					setChanged();
+					notifyObservers("display_message");
+				}
+			} catch (InterruptedException e){
+				message = "Interruption occurred during threads termination.\n";
+				setChanged();
+				notifyObservers("display_message");
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

@@ -1,5 +1,6 @@
 package presenter;
 
+import GUIview.GUI;
 import algorithms.*;
 import algorithms.mazeGenerators.Maze3d;
 import model.Model;
@@ -22,6 +23,10 @@ public class DisplayMazeCommand implements Command {
 		if (maze == null)
 			view.displayMessage("Maze " + "'"+ name +"'" + " not found\n");
 		else
+			if(view instanceof GUI){
+				((GUI) view).setMaze3d(maze);
+			}
+			else
 			view.displayMaze(maze);
 
 	}

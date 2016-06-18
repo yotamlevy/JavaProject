@@ -43,6 +43,7 @@ public class Presenter implements Observer {
 		viewCommands.put("help", new HelpCommand(view));
 		viewCommands.put("save_zip_map", new SaveZipMap(model, view));
 		viewCommands.put("load_zip_map", new LoadZipMap(model, view));
+		viewCommands.put("exit", new ExitCommnd(model));
 		
 		modelCommands = new HashMap<String, Command>();
 		modelCommands.put("display_message", new DisplayMessageCommand(model, view));
@@ -56,6 +57,7 @@ public class Presenter implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o == model) {
+	
 			String commandName = (String)arg;
 			Command command = modelCommands.get(commandName);
 			if (command == null) {

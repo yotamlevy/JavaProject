@@ -1,10 +1,21 @@
 package GUIview;
 
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+
+import algorithms.mazeGenerators.Maze3d;
+import algorithms.mazeGenerators.Position;
 
 public class Maze3D extends MazeDisplayer {
 
@@ -12,6 +23,35 @@ public class Maze3D extends MazeDisplayer {
 	public int characterY=2;
 	public int exitX=0;
 	public int exitY=2;
+	private Maze3d currMaze;
+	public Position goal = new Position();
+	private Position characterPostion = new Position();; 
+	
+	
+	public Maze3d getCurrMaze() {
+		return currMaze;
+	}
+	public void setCurrMaze(Maze3d m) {
+		this.currMaze = m;
+		goal = m.getGoalPosition();
+		mazeData = currMaze.getCrossSectionByX(currMaze.getStartPosition().getX());
+		setGoal(m.getGoalPosition());
+		setCharacterPosition(currMaze.getStartPosition().getX(), currMaze.getStartPosition().getY(), currMaze.getStartPosition().getZ());
+	}
+	
+	public Position getGoal() {
+		return goal;
+	}
+	public void setGoal(Position goal) {
+		this.goal = goal;
+	}
+	
+	@Override
+	public void setCharacterPosition(int x, int y, int z) {
+		mazeData = currMaze.getCrossSectionByY(y);
+		moveCharacter(x, y, z);
+		
+	}
 	
 	private void paintCube(double[] p,double h,PaintEvent e){
         int[] f=new int[p.length];
@@ -31,6 +71,7 @@ public class Maze3D extends MazeDisplayer {
         e.gc.fillPolygon(r);
 		
 	}
+	
 	public Maze3D(Composite parent, int style) {
 		super(parent, style);
 		
@@ -100,6 +141,7 @@ public class Maze3D extends MazeDisplayer {
 		int y=characterY;
 		y=y-1;
 		moveCharacter(x, y);
+		makeSound("cartoon015.wav");
 	}
 	/* (non-Javadoc)
 	 * @see view.MazeDisplayer#moveDown()
@@ -110,6 +152,7 @@ public class Maze3D extends MazeDisplayer {
 		int y=characterY;
 		y=y+1;
 		moveCharacter(x, y);
+		makeSound("cartoon015.wav");
 	}
 	/* (non-Javadoc)
 	 * @see view.MazeDisplayer#moveLeft()
@@ -120,6 +163,7 @@ public class Maze3D extends MazeDisplayer {
 		int y=characterY;
 		x=x-1;
 		moveCharacter(x, y);
+		makeSound("cartoon015.wav");
 	}
 	/* (non-Javadoc)
 	 * @see view.MazeDisplayer#moveRight()
@@ -130,6 +174,7 @@ public class Maze3D extends MazeDisplayer {
 		int y=characterY;
 		x=x+1;
 		moveCharacter(x, y);
+		makeSound("cartoon015.wav");
 	}
 	
 	@Override
@@ -138,5 +183,104 @@ public class Maze3D extends MazeDisplayer {
 		characterY=row;
 		moveCharacter(col,row);
 	}
+	
+	public void setCharacterX(int characterX) {
+		this.characterX = characterX;
+	}
+	public void setCharacterY(int characterY) {
+		this.characterY = characterY;
+	}
+	public void setCharacterInPlace(int x,int y,int z)
+	{
+		//here i got the position,if the maze and the position is exists ,i draw on the canvas
+		this.characterPostion =new Position(x,y,z);
+		if(currMaze!=null)
+		{
+			getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() 
+				{
+					redraw();
+					update();
+					layout();	
+				}
+			});
+		}
+		
+	}
+	
+	public void makeSound(String soundFile)
+	{
+		File audio = new File(soundFile);
+		try 
+		{
+			Clip c = AudioSystem.getClip();
+			c.open(AudioSystem.getAudioInputStream(audio));
+			c.start();
+		} 
+		catch (LineUnavailableException e) 
+		{
+			
+			e.printStackTrace();
+		} catch (IOException e) 
+		{
+			
+			e.printStackTrace();
+		} catch (UnsupportedAudioFileException e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	@Override
+	public void moveUpstairs() {
+//		int x=characterX;
+//		int y=characterY;
+//		moveCharacter(x, y);
+//		characterPostion.setX(x + 1);
+//		characterPostion.setY(y);
+		Position pos = getCharacterPosition();
+		if((pos.getX() + 1 >= 0 && pos.getX() + 1 < currMaze.getWidth())){
+			mazeData = currMaze.getCrossSectionByX(pos.getX() +1);
+			moveCharacter(pos.getX()+1, pos.getY(), pos.getZ());
+			redraw();
+			update();
+			layout();
+		}
+		makeSound("cartoon015.wav");
+	}
+		
+	@Override
+	public void moveDownstairs() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void moveCharacter(int x, int y, int z){
+		Position pos = new Position(x, y, z);
+		System.out.println(pos.toString());
+		if((x >= 0 && x < currMaze.getMaze().length) && (y >= 0 && y < currMaze.getMaze()[1].length) && (z >= 0 && z < currMaze.getMaze()[0][1].length)){
+			if  (currMaze.getValueAt(pos.getX(), pos.getY(), pos.getZ()) == 0){
+				characterPostion.setX(x);
+				characterPostion.setY(y);
+				characterPostion.setZ(z);
+
+						getShell().update();
+						getDisplay().update();
+					
+				return;
+			}
+		}
+		return;
+	}
+	
+	public Position getCharacterPosition() {
+		return characterPostion;
+	}
+	public void setCharacterPostion(Position characterPostion) {
+		this.characterPostion = characterPostion;
+	}
+
 
 }
