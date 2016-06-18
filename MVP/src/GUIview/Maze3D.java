@@ -18,39 +18,64 @@ import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.Position;
 
 public class Maze3D extends MazeDisplayer {
-
-	public int characterX=0;
-	public int characterY=2;
-	public int exitX=0;
-	public int exitY=2;
+	
+	public static final int[] UP = { 0, -1, 0 };
+	public static final int[] DOWN = { 0, 1, 0 };
+	public static final int[] RIGHT = { 0, 0, 1 };
+	public static final int[] LEFT= { 0, 0 , -1 };
+	public static final int[] UPWARDS = { 1, 0, 0 };
+	public static final int[] DOWNWARDS = { -1, 0, 0 };
 	private Maze3d currMaze;
 	public Position goal = new Position();
-	private Position characterPostion = new Position();; 
+	private Position characterPostion = new Position();
 	
-	
+	public Maze3D(Composite parent, int style){
+	    super(parent, style);
+	    initializeWindow(parent, style);
+	}
 	public Maze3d getCurrMaze() {
 		return currMaze;
 	}
 	public void setCurrMaze(Maze3d m) {
 		this.currMaze = m;
-		goal = m.getGoalPosition();
-		mazeData = currMaze.getCrossSectionByX(currMaze.getStartPosition().getX());
-		setGoal(m.getGoalPosition());
-		setCharacterPosition(currMaze.getStartPosition().getX(), currMaze.getStartPosition().getY(), currMaze.getStartPosition().getZ());
+	    this.goal = currMaze.getGoalPosition();
+	    this.characterPostion = currMaze.getStartPosition();
+	    System.out.println(characterPostion);
+	    this.mazeData = currMaze.getCrossSectionByX(this.characterPostion.getX());
+	    updateWindow();
 	}
+	
+	public void move(int[] direction) {
+		System.out.println("current position: " + characterPostion);
+	    Position pos = new Position(this.characterPostion.getX() + direction[0],
+	                                this.characterPostion.getY() + direction[1],
+	                                this.characterPostion.getZ() + direction[2]);
+	    System.out.println("to go position: " + pos);
+	    System.out.println(checkViableMove(pos));
+	    if (checkViableMove(pos)) {
+	    	
+	      this.characterPostion = pos;
+	      if (direction[0] != 0)
+	    	  mazeData = this.currMaze.getCrossSectionByX(pos.getX());
+	      makeSound("cartoon015.wav");
+	      updateWindow();
+	    }
+	  }
+
+	  // painting methods
+	  private void updateWindow() {
+	    getDisplay().syncExec(new Runnable() {
+	      @Override
+	      public void run() {
+	        redraw();
+	        update();
+	        layout();
+	      }
+	    });
+	  }
 	
 	public Position getGoal() {
 		return goal;
-	}
-	public void setGoal(Position goal) {
-		this.goal = goal;
-	}
-	
-	@Override
-	public void setCharacterPosition(int x, int y, int z) {
-		mazeData = currMaze.getCrossSectionByY(y);
-		moveCharacter(x, y, z);
-		
 	}
 	
 	private void paintCube(double[] p,double h,PaintEvent e){
@@ -72,8 +97,7 @@ public class Maze3D extends MazeDisplayer {
 		
 	}
 	
-	public Maze3D(Composite parent, int style) {
-		super(parent, style);
+	public void initializeWindow(Composite parent, int style) {
 		
 		final Color white=new Color(null, 255, 255, 255);
 		final Color black=new Color(null, 150,150,150);
@@ -104,7 +128,7 @@ public class Maze3D extends MazeDisplayer {
 				          if(mazeData[i][j]!=0)
 				        	  paintCube(dpoints, cheight,e);
 				          
-				          if(i==characterY && j==characterX){
+				          if(i==characterPostion.getY() && j==characterPostion.getZ()){
 							   e.gc.setBackground(new Color(null,200,0,0));
 							   e.gc.fillOval((int)Math.round(dpoints[0]), (int)Math.round(dpoints[1]-cheight/2), (int)Math.round((w0+w1)/2), (int)Math.round(h));
 							   e.gc.setBackground(new Color(null,255,0,0));
@@ -117,99 +141,19 @@ public class Maze3D extends MazeDisplayer {
 			}
 		});
 	}
-	
-	private void moveCharacter(int x,int y){
-		if(x>=0 && x<mazeData[0].length && y>=0 && y<mazeData.length && mazeData[y][x]==0){
-			characterX=x;
-			characterY=y;
-			getDisplay().syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					redraw();
-				}
-			});
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see view.MazeDisplayer#moveUp()
-	 */
-	@Override
-	public void moveUp() {
-		int x=characterX;
-		int y=characterY;
-		y=y-1;
-		moveCharacter(x, y);
-		makeSound("cartoon015.wav");
-	}
-	/* (non-Javadoc)
-	 * @see view.MazeDisplayer#moveDown()
-	 */
-	@Override
-	public void moveDown() {
-		int x=characterX;
-		int y=characterY;
-		y=y+1;
-		moveCharacter(x, y);
-		makeSound("cartoon015.wav");
-	}
-	/* (non-Javadoc)
-	 * @see view.MazeDisplayer#moveLeft()
-	 */
-	@Override
-	public void moveLeft() {
-		int x=characterX;
-		int y=characterY;
-		x=x-1;
-		moveCharacter(x, y);
-		makeSound("cartoon015.wav");
-	}
-	/* (non-Javadoc)
-	 * @see view.MazeDisplayer#moveRight()
-	 */
-	@Override
-	public void moveRight() {
-		int x=characterX;
-		int y=characterY;
-		x=x+1;
-		moveCharacter(x, y);
-		makeSound("cartoon015.wav");
-	}
-	
-	@Override
-	public void setCharacterPosition(int row, int col) {
-		characterX=col;
-		characterY=row;
-		moveCharacter(col,row);
-	}
-	
-	public void setCharacterX(int characterX) {
-		this.characterX = characterX;
-	}
-	public void setCharacterY(int characterY) {
-		this.characterY = characterY;
-	}
-	public void setCharacterInPlace(int x,int y,int z)
-	{
-		//here i got the position,if the maze and the position is exists ,i draw on the canvas
-		this.characterPostion =new Position(x,y,z);
-		if(currMaze!=null)
-		{
-			getDisplay().syncExec(new Runnable() {
-				
-				@Override
-				public void run() 
-				{
-					redraw();
-					update();
-					layout();	
-				}
-			});
-		}
-		
-	}
-	
+
+	private boolean checkViableMove(Position pos) {
+		if (checkBounds(pos.getX(), this.currMaze.getHeight()) &&
+        checkBounds(pos.getY(), this.currMaze.getWidth()) &&
+        checkBounds(pos.getZ(),this.currMaze.getDepth()))
+			return currMaze.getValueAt(pos.getX(), pos.getY(), pos.getZ()) == 0;
+		return false;
+	  }
+
+	  private boolean checkBounds(int param, int bound) {
+	    return param >= 0 && param < bound;
+	  }
+
 	public void makeSound(String soundFile)
 	{
 		File audio = new File(soundFile);
@@ -233,54 +177,11 @@ public class Maze3D extends MazeDisplayer {
 		}
 		
 	}
-	@Override
-	public void moveUpstairs() {
-//		int x=characterX;
-//		int y=characterY;
-//		moveCharacter(x, y);
-//		characterPostion.setX(x + 1);
-//		characterPostion.setY(y);
-		Position pos = getCharacterPosition();
-		if((pos.getX() + 1 >= 0 && pos.getX() + 1 < currMaze.getWidth())){
-			mazeData = currMaze.getCrossSectionByX(pos.getX() +1);
-			moveCharacter(pos.getX()+1, pos.getY(), pos.getZ());
-			redraw();
-			update();
-			layout();
-		}
-		makeSound("cartoon015.wav");
-	}
-		
-	@Override
-	public void moveDownstairs() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public void moveCharacter(int x, int y, int z){
-		Position pos = new Position(x, y, z);
-		System.out.println(pos.toString());
-		if((x >= 0 && x < currMaze.getMaze().length) && (y >= 0 && y < currMaze.getMaze()[1].length) && (z >= 0 && z < currMaze.getMaze()[0][1].length)){
-			if  (currMaze.getValueAt(pos.getX(), pos.getY(), pos.getZ()) == 0){
-				characterPostion.setX(x);
-				characterPostion.setY(y);
-				characterPostion.setZ(z);
 
-						getShell().update();
-						getDisplay().update();
-					
-				return;
-			}
-		}
-		return;
-	}
 	
 	public Position getCharacterPosition() {
 		return characterPostion;
 	}
-	public void setCharacterPostion(Position characterPostion) {
-		this.characterPostion = characterPostion;
-	}
-
+	
 
 }

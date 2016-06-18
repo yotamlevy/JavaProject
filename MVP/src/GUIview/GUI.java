@@ -176,8 +176,9 @@ public class GUI extends BasicWindow implements View{
 				notifyObservers(command);
 				mazeToPaint = maze3d.getCrossSectionByX(maze3d.getStartPosition().getX());
 				maze.setMazeData(mazeToPaint);
-                                
-				maze.setCharacterPosition(maze3d.getStartPosition().getY(), maze3d.getStartPosition().getZ());
+				
+				maze.setCurrMaze(maze3d);         
+//				maze.setCharacterPosition(maze3d.getStartPosition().getY(), maze3d.getStartPosition().getZ());
 				maze.redraw();
 				isStartedGame = true;
 				maze.forceFocus();
@@ -195,23 +196,22 @@ public class GUI extends BasicWindow implements View{
 						
 						switch (e.keyCode) {
 						case SWT.ARROW_LEFT:
-							maze.moveLeft();
+							maze.move(Maze3D.LEFT);
 							break;
 						case SWT.ARROW_RIGHT:
-							maze.moveRight();
+							maze.move(Maze3D.RIGHT);
 							break;
 						case SWT.ARROW_UP:
-							maze.moveUp();;
+							maze.move(Maze3D.UP);
 							break;
 						case SWT.ARROW_DOWN:
-							maze.moveDown();
+							maze.move(Maze3D.DOWN);
 							break;
 						case SWT.PAGE_UP:
-							maze.setCurrMaze(maze3d);
-							maze.moveUpstairs();
+							maze.move(Maze3D.UPWARDS);
 							break;
 						case SWT.PAGE_DOWN:
-							maze.moveDownstairs();
+							maze.move(Maze3D.DOWNWARDS);
 							break;
 						
 					}

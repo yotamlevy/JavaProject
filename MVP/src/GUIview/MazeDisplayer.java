@@ -40,42 +40,21 @@ public abstract class MazeDisplayer extends Canvas{
 	public void setMazeData(int[][] mazeData){
 		this.mazeData=mazeData;
 	}
-	
-	public abstract  void setCharacterPosition(int row,int col);
-	
+
 	/**
 	 * sets the current maze
 	 */
 	public abstract void setCurrMaze(Maze3d m);
 	
-	/**
-	 * get the current maze
-	 */
-	public abstract Maze3d getCurrMaze();
 
-	
-	public abstract void setCharacterInPlace(int x,int y,int z);
 	
 	/**
 	 * Return the position of the character.
 	 * @return
 	 */
 	public abstract Position getCharacterPosition();
-	
-	public abstract void moveUp();
 
-	public abstract  void moveDown();
 
-	public abstract  void moveLeft();
-
-	public  abstract void moveRight();
-	
-	public abstract void moveUpstairs();
-	
-	public abstract void moveDownstairs();
-	
-	public abstract void moveCharacter(int x, int y, int z);
-
-	public abstract void setCharacterPosition(int x, int y, int z);
+	public abstract void move(int[] direction); 
 
 }
