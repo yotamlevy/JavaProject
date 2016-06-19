@@ -1,6 +1,10 @@
 package presenter;
 
+import GUIview.GUI;
+import algorithms.demo.Maze3dAdapter;
 import algorithms.mazeGenerators.Maze3d;
+import algorithms.search.BFS;
+import algorithms.search.Solution;
 import model.Model;
 import view.View;
 
@@ -30,6 +34,13 @@ public class SolveMaze implements Command {
 		if (maze == null){
 			view.displayMessage("Maze " + "'"+ name +"'" + " not found\n");
 		}else
+			if(view instanceof GUI){
+				Maze3dAdapter mAdapter = new Maze3dAdapter(maze);
+				BFS bfs = new BFS();
+				Solution sol = bfs.search(mAdapter);
+				((GUI) view).setSolution(sol);
+			}
+			else
 			model.SolveMaze(name, algorithm);
 
 	}

@@ -14,11 +14,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Synchronizer;
 import org.eclipse.swt.widgets.Text;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import algorithms.*;
 import algorithms.mazeGenerators.Maze3d;
@@ -39,9 +42,19 @@ public class GUI extends BasicWindow implements View{
 	private KeyListener canvasKeyListener;
 	private Boolean keyListenerActivator = true;
 	private Position characterPos;
+	private Solution solution;
 	
+	public Solution getSolution() {
+		return solution;
+	}
+
+	public void setSolution(Solution solution) {
+		this.solution = solution;
+	}
+
 	public GUI(String title, int width, int height) {
 		super(title, width, height);
+		messageBox = new MessageBox(shell,  SWT.ICON_INFORMATION| SWT.OK);
 	}
 	
 	/**
@@ -141,6 +154,7 @@ public class GUI extends BasicWindow implements View{
 						command +=  n + ' ' + floors.getText() + ' ' + rows.getText() + ' ' + cols.getText();
 						setChanged();
 						notifyObservers(command);
+						sendMessage("**Maze " + n + " is ready**\nDisplay and play it!");
 						selections.close();
 						
 					}
@@ -215,6 +229,9 @@ public class GUI extends BasicWindow implements View{
 							break;
 						
 					}
+						if(maze.getCharacterPosition().equals(maze3d.getGoalPosition())){
+							sendMessage("You Won!!!");
+						}
 				}
 			});
 		}
@@ -240,6 +257,66 @@ public class GUI extends BasicWindow implements View{
 			public void widgetDefaultSelected(SelectionEvent arg0) {}
 		});
 		
+		btnSaveMaze.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				String command = "save_maze " + n + " " + n + "MazeFile.txt" ;
+				setChanged();
+				notifyObservers(command);
+				sendMessage("Maze " + n + " has been saved");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0){}
+		});
+		
+		btnLoadMaze.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				
+				FileDialog fd = new FileDialog(shell);
+				fd.setText("Load Maze");
+				fd.setFilterPath("files");
+				String [] filterExt = {"*.*"};
+				fd.setFilterExtensions(filterExt);
+				String fileSelected = fd.open();
+				if (fileSelected == null) 
+				{
+					sendMessage("Pay attention!\n you didn't choose any file\n the maze didn't load.");
+					return;
+				}
+		
+				String MazeFileSelectedName = fileSelected.substring(32, fileSelected.length() - 4);
+				System.out.println(MazeFileSelectedName);
+				String fileNameWithTXT = fileSelected.substring(32);
+				System.out.println(fileNameWithTXT);
+				setChanged();
+				String command = "load_maze "  + MazeFileSelectedName + " " + fileNameWithTXT;
+				setChanged();
+				notifyObservers(command);
+				sendMessage("Maze " + MazeFileSelectedName + " has been loaded");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0){}
+		});
+		
+		btnSolveMaze.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0){
+				String command = "solve" + " " + n;
+				setChanged();
+				notifyObservers(command);
+				maze.solveTheMaze(solution);
+				sendMessage("Solving...");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {}
+		});
 				
   }
 

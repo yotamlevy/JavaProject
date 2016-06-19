@@ -3,7 +3,12 @@ package GUIview;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javax.print.attribute.IntegerSyntax;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
@@ -14,8 +19,10 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
+import algorithms.domains.State;
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.Position;
+import algorithms.search.Solution;
 
 public class Maze3D extends MazeDisplayer {
 	
@@ -27,7 +34,9 @@ public class Maze3D extends MazeDisplayer {
 	public static final int[] DOWNWARDS = { -1, 0, 0 };
 	private Maze3d currMaze;
 	public Position goal = new Position();
-	private Position characterPostion = new Position();
+	private Position characterPosition = new Position();
+	private Timer timer;
+	private TimerTask task;
 	
 	public Maze3D(Composite parent, int style){
 	    super(parent, style);
@@ -39,22 +48,18 @@ public class Maze3D extends MazeDisplayer {
 	public void setCurrMaze(Maze3d m) {
 		this.currMaze = m;
 	    this.goal = currMaze.getGoalPosition();
-	    this.characterPostion = currMaze.getStartPosition();
-	    System.out.println(characterPostion);
-	    this.mazeData = currMaze.getCrossSectionByX(this.characterPostion.getX());
+	    this.characterPosition = currMaze.getStartPosition();
+	    this.mazeData = currMaze.getCrossSectionByX(this.characterPosition.getX());
 	    updateWindow();
 	}
 	
 	public void move(int[] direction) {
-		System.out.println("current position: " + characterPostion);
-	    Position pos = new Position(this.characterPostion.getX() + direction[0],
-	                                this.characterPostion.getY() + direction[1],
-	                                this.characterPostion.getZ() + direction[2]);
-	    System.out.println("to go position: " + pos);
-	    System.out.println(checkViableMove(pos));
+	    Position pos = new Position(this.characterPosition.getX() + direction[0],
+	                                this.characterPosition.getY() + direction[1],
+	                                this.characterPosition.getZ() + direction[2]);
 	    if (checkViableMove(pos)) {
 	    	
-	      this.characterPostion = pos;
+	      this.characterPosition = pos;
 	      if (direction[0] != 0)
 	    	  mazeData = this.currMaze.getCrossSectionByX(pos.getX());
 	      makeSound("cartoon015.wav");
@@ -128,7 +133,7 @@ public class Maze3D extends MazeDisplayer {
 				          if(mazeData[i][j]!=0)
 				        	  paintCube(dpoints, cheight,e);
 				          
-				          if(i==characterPostion.getY() && j==characterPostion.getZ()){
+				          if(i==characterPosition.getY() && j==characterPosition.getZ()){
 							   e.gc.setBackground(new Color(null,200,0,0));
 							   e.gc.fillOval((int)Math.round(dpoints[0]), (int)Math.round(dpoints[1]-cheight/2), (int)Math.round((w0+w1)/2), (int)Math.round(h));
 							   e.gc.setBackground(new Color(null,255,0,0));
@@ -178,9 +183,75 @@ public class Maze3D extends MazeDisplayer {
 		
 	}
 
+	/**
+	 * This method will take the character to the goal position step by step.
+	 */
+	@Override
+	public void solveTheMaze(Solution solution) {
+
+		Collections.reverse(solution.getStates());
+		timer = new Timer();
+		task = new TimerTask() {
+			int i = solution.getStates().size() -1;
+			
+			@Override
+			public void run() {
+
+				if(i >= 0){
+//					System.out.println(solution.getStates().get(i));
+//					System.out.println(Integer.parseInt(solution.getStates().get(i).toString().substring(1,2)));
+//					System.out.println(Integer.parseInt(solution.getStates().get(i).toString().substring(3,4)));
+//					System.out.println(Integer.parseInt(solution.getStates().get(i).toString().substring(5,6)));
+					setCharacterPosition(Integer.parseInt(solution.getStates().get(i).toString().substring(1,2)),
+							Integer.parseInt(solution.getStates().get(i).toString().substring(3,4)),
+							Integer.parseInt(solution.getStates().get(i).toString().substring(5,6)));
+					try {
+						Thread.sleep(400);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					i--;
+				}
+				else{
+					timer.cancel();
+					timer.purge();
+				}
+			}
+		};
+		timer.scheduleAtFixedRate(task, 0, 100);
+		timer.purge();
+	}
 	
+
+	@Override
+	public void setCharacterPosition(int x, int y, int z) {
+		mazeData = currMaze.getCrossSectionByX(x);
+		moveCharacter(x, y, z);
+		
+	}
+	
+	public void moveCharacter(int x, int y, int z){
+		Position pos = new Position(x, y, z);
+		if((x >= 0 && x < currMaze.getMaze().length) && (y >= 0 && y < currMaze.getMaze()[1].length) && (z >= 0 && z < currMaze.getMaze()[0][1].length)){
+			if  (currMaze.getValueAt(pos.getX(),pos.getY(),pos.getZ()) == 0){
+				characterPosition.setX(x);
+				characterPosition.setY(y);
+				characterPosition.setZ(z);
+				getDisplay().syncExec(new Runnable() {	
+					@Override
+					public void run() {
+						redraw();
+						getShell().update();
+						getDisplay().update();
+						
+					}
+				});
+			}	
+		}
+	}
 	public Position getCharacterPosition() {
-		return characterPostion;
+		return characterPosition;
 	}
 	
 

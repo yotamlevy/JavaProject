@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.Position;
+import algorithms.search.Solution;
 import view.View;
 
 import org.eclipse.swt.events.KeyListener;
@@ -47,14 +48,17 @@ public abstract class MazeDisplayer extends Canvas{
 	public abstract void setCurrMaze(Maze3d m);
 	
 
+	public abstract void setCharacterPosition(int x, int y, int z);
 	
+	public abstract void moveCharacter(int x, int y, int z);
 	/**
 	 * Return the position of the character.
 	 * @return
 	 */
 	public abstract Position getCharacterPosition();
 
-
+	public abstract void solveTheMaze(Solution solution);
+	
 	public abstract void move(int[] direction); 
 
 }
